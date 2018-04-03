@@ -1,69 +1,45 @@
-import express from 'express';
-import swaggerUi from 'swagger-ui-express';
-const bodyParser = require('body-parser')
-const swagger = require('swagger-express-router');
+const Koa = require('koa');
+const logger = require('koa-logger');
+const bodyParser = require('koa-bodyparser');
+const Router = require('koa-oai-router');
+const middleware = require('koa-oai-router-middleware');
+import boom from 'boom';
 
 import { Model } from 'objection';
 import knexConfig from '../knexfile';
 import Knex from 'knex';
 
-import readdir from "recursive-readdir";
-
-import * as battle from './controllers/battle';
-let boom = require('express-boom');
+const app = new Koa();
 
 const knex = Knex(knexConfig.development);
 Model.knex(knex);
 
-let app = express();
-app.use( bodyParser.json() );
-//app.use(boom);
+const debug = require('debug')('aotds:rest');
 
-let swaggerDoc = {
-   "swagger": "2.0",
-   "info": {
-     "title": "AotDS game server",
-     "description": "REST server keep track of the games",
-     "version": "0.0.1"
-   },
-   "produces": ["application/json"],
-   "consumes": ["application/json"],
-   "host": "localhost:3000",
-   "basePath": "/api",
-   "paths": { }
-};
- 
-readdir("./src/controllers").then((files) => {
-    let mws = {};
-    files.forEach( file => {
-        if( /test/.test(file) ) return;
+app.use(logger());
+app.use(bodyParser());
 
-        let i = require( file.replace( 'src/', './' ) );
-        swaggerDoc = i.update_swagger(swaggerDoc);
-        let path = file.replace( 'src/controllers/', '' ).replace('.js','');
-        mws[path] = i;
-    });
+app.use( async (ctx, next) => {
+    try { await next() }
+    catch(err) {
+        debug(err);
+        if( !err.isBoom ) {
+            err = boom.badImplementation(err);
+        }
 
-    return { swaggerDoc, mws }
-}).then( ({ swaggerDoc, mws }) => {
-    app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDoc));
-
-    app.get('/api/docs.json', (req,res,next) => {
-        res.send(swaggerDoc);
-    });
-
-    console.log(mws)
-    swagger.setUpRoutes( mws, app, swaggerDoc, true );
-
-    app.use((err, req, res, next) => {
-        let output = err.output.payload;
-        if( err.data ) { output.data = err.data }
-        return res.status(err.output.statusCode).json(output);
-    });
-
-    app.listen(3000, () => console.log("READY!"));
-}).catch( e => {
-    console.log(e);
+        ctx.body = err.output.payload;
+        ctx.status = err.output.statusCode;
+        if( err.data ) {
+            ctx.body.data = err.data;
+        }
+    }
 });
 
+const router = new Router({ apiDoc: './api', });
+
+router.mount(middleware, './src/controllers');
+
+app.use(router.routes());
+
+app.listen(3000, () => console.log( "good to go") );
 

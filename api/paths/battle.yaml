@@ -1,7 +1,25 @@
-/battle/{id}:
+/battle/{battle_id}/ship/{ship_id}/orders:
     post:
         parameters:
-            - name: id
+            - name: battle_id
+              in: path
+              type: string
+              required: true
+            - name: ship_id
+              in: path
+              type: string
+              required: true
+        description: dispatch orders to ship
+        x-oai-controller:
+            - file: battle
+              handler: post_orders
+        responses:
+            200:
+                description: orders sent to ship
+/battle/{battle_id}:
+    post:
+        parameters:
+            - name: battle_id
               in: path
               type: string
               required: true
@@ -14,20 +32,16 @@
                 description: new battle is created
     get:
         parameters:
-            - name: potato
-              in: query
-              type: string
-              required: true
-            - name: id
+            - name: battle_id
               in: path
               type: string
               required: true
         description: return the current turn of the battle
         x-oai-controller:
             - file: battle
-              handler: get
+              handler: get_battle
         responses:
             200:
-                description: the current turn  for the given battle
+                description: the current turn for the given battle
             default:
                 description: unexpected error

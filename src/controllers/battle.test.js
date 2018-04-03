@@ -35,15 +35,13 @@ const create_game = fp.memoize( async () => {
         res.send = body => resolve(body);
     });
 
-    create_battle( req, res, next  );
+    let ctx = { request: { body: sample_game } };
 
-    let body = await res_promise;
-    
-    expect(body).toMatchObject({
+    await create_battle( ctx, () => 1 );
+
+    expect(ctx.body).toMatchObject({
         game: { name: 'epsilon', turn: 0 }
     });
-
-    return;
 });
 
 test( 'create a game', create_game )
@@ -51,23 +49,14 @@ test( 'create a game', create_game )
 test( 'get battle', async () => {
     await create_game();
 
-    let req = { params: { id: 'banana' } };
+    let ctx = { params: { battle_id: 'banana' } };
 
-    let res_promise = new Promise( resolve => {
-        let res = { send: resolve };
-        get_battle(req,res,resolve);
-    });
+    await expect( get_battle(ctx, () => 1 ) ).rejects.toThrow(
+    );
 
-    let next = await res_promise;
+    ctx.params.battle_id = 'epsilon';
+    let good = await get_battle(ctx, () => 1 );
 
-    expect(next).toHaveProperty('isBoom', true );
-    expect(next).toHaveProperty('output.statusCode', 404 );
-
-    next = await new Promise( resolve => {
-        let res = { send: resolve };
-        get_battle({ params: { id: 'epsilon' } },res,resolve);
-    });
-
-    expect(next).toMatchObject({ game: { name: 'epsilon', turn: 0 }});
+    expect(good).toMatchObject({ game: { name: 'epsilon', turn: 0 }});
 
 });
