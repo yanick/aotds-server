@@ -2,6 +2,7 @@
     "plugins":
     ["transform-decorators-legacy","transform-class-properties","transform-function-bind",],
     "presets":[
-        "es2015", "stage-1", "stage-0"
+        [ "env", { "targets": { "node": "current" } }], 
+        "stage-1", "stage-0"
     ]
 }

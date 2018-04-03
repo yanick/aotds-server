@@ -1,44 +1,69 @@
-const Koa = require('koa');
-const logger = require('koa-logger');
-const bodyParser = require('koa-bodyparser');
-const Router = require('koa-router');
+import express from 'express';
+import swaggerUi from 'swagger-ui-express';
+const bodyParser = require('body-parser')
+const swagger = require('swagger-express-router');
 
-import BattleDB from './db/battle';
+import { Model } from 'objection';
+import knexConfig from '../knexfile';
+import Knex from 'knex';
 
-let battle_db = new BattleDB( './battles.db' );
+import readdir from "recursive-readdir";
+
+import * as battle from './controllers/battle';
+let boom = require('express-boom');
+
+const knex = Knex(knexConfig.development);
+Model.knex(knex);
+
+let app = express();
+app.use( bodyParser.json() );
+//app.use(boom);
+
+let swaggerDoc = {
+   "swagger": "2.0",
+   "info": {
+     "title": "AotDS game server",
+     "description": "REST server keep track of the games",
+     "version": "0.0.1"
+   },
+   "produces": ["application/json"],
+   "consumes": ["application/json"],
+   "host": "localhost:3000",
+   "basePath": "/api",
+   "paths": { }
+};
  
-const app = new Koa();
- 
-app.use(logger());
-app.use(bodyParser());
+readdir("./src/controllers").then((files) => {
+    let mws = {};
+    files.forEach( file => {
+        if( /test/.test(file) ) return;
 
-let router = new Router();
+        let i = require( file.replace( 'src/', './' ) );
+        swaggerDoc = i.update_swagger(swaggerDoc);
+        let path = file.replace( 'src/controllers/', '' ).replace('.js','');
+        mws[path] = i;
+    });
 
-// create a brand-new battle
-router.post('/api/battle', async (ctx, next) => {
-    ctx.body =  ( await battle_db.create_battle(ctx.request.body) ).state;
-    await next();
+    return { swaggerDoc, mws }
+}).then( ({ swaggerDoc, mws }) => {
+    app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDoc));
+
+    app.get('/api/docs.json', (req,res,next) => {
+        res.send(swaggerDoc);
+    });
+
+    console.log(mws)
+    swagger.setUpRoutes( mws, app, swaggerDoc, true );
+
+    app.use((err, req, res, next) => {
+        let output = err.output.payload;
+        if( err.data ) { output.data = err.data }
+        return res.status(err.output.statusCode).json(output);
+    });
+
+    app.listen(3000, () => console.log("READY!"));
+}).catch( e => {
+    console.log(e);
 });
 
-// get current round of that battle
-router.get('/api/battle/:battle_name', async (ctx, next) => {
-    ctx.body =  ( await battle_db.get_battle(ctx.params.battle_name) ).state;
-    await next();
-});
 
-// post orders for the given ship
-router.post('/api/battle/:battle_name/ship/:ship_id/orders', async (ctx, next) => {
-    let battle = await battle_db.get_battle(ctx.params.battle_name);
-    battle.post_orders( ctx.params.ship_id, ctx.request.body );
-    ctx.body = battle.state;
-    await next();
-});
-
-
-
-
-app.use(router.routes());
-
-
- 
-app.listen(3000);

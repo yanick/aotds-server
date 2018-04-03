@@ -1,0 +1,33 @@
+/battle/{id}:
+    post:
+        parameters:
+            - name: id
+              in: path
+              type: string
+              required: true
+        description: create a new battle
+        x-oai-controller:
+            - file: battle
+              handler: create_battle
+        responses:
+            200:
+                description: new battle is created
+    get:
+        parameters:
+            - name: potato
+              in: query
+              type: string
+              required: true
+            - name: id
+              in: path
+              type: string
+              required: true
+        description: return the current turn of the battle
+        x-oai-controller:
+            - file: battle
+              handler: get
+        responses:
+            200:
+                description: the current turn  for the given battle
+            default:
+                description: unexpected error
