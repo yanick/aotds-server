@@ -7,6 +7,26 @@ import boom from 'boom';
 
 const debug = require('debug')('aotds:rest');
 
+export const play_turn = async(ctx,next) => {
+    let { battle_id } = ctx.params;
+    debug( ctx.query );
+
+    let battle = await GameTurns.get_battle(battle_id);
+
+    let turn = battle.state.game.turn;
+
+    battle.play_turn(ctx.query.force);
+
+    if( battle.state.game.turn > turn ) {
+        ctx.status = 201;
+        await battle.save(); 
+    }
+
+    ctx.body = battle.state;
+
+    await next();
+};
+
 export const post_orders = async(ctx,next) => {
     let { battle_id, ship_id } = ctx.params;
     let orders = ctx.request.body;

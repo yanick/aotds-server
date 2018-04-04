@@ -1,3 +1,24 @@
+/battle/{battle_id}/turn:
+    post:
+        description: trigger a turn
+        parameters:
+            - name: battle_id
+              in: path
+              type: string
+              required: true
+            - name: force
+              in: query
+              type: boolean
+              required: false
+              default: false
+        x-oai-controller:
+            - file: battle
+              handler: play_turn
+        responses:
+            200:
+                description: not all orders in, turn not played
+            201:
+                description: turn played
 /battle/{battle_id}/ship/{ship_id}/orders:
     post:
         parameters:
@@ -16,13 +37,8 @@
         responses:
             200:
                 description: orders sent to ship
-/battle/{battle_id}:
+/battle:
     post:
-        parameters:
-            - name: battle_id
-              in: path
-              type: string
-              required: true
         description: create a new battle
         x-oai-controller:
             - file: battle
@@ -30,6 +46,7 @@
         responses:
             200:
                 description: new battle is created
+/battle/{battle_id}:
     get:
         parameters:
             - name: battle_id
