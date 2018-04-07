@@ -1,4 +1,6 @@
 const Koa = require('koa');
+import jwt from 'koa-jwt';
+
 const logger = require('koa-logger');
 const bodyParser = require('koa-bodyparser');
 const Router = require('koa-oai-router');
@@ -16,6 +18,8 @@ Model.knex(knex);
 
 const debug = require('debug')('aotds:rest');
 
+// TODO move the secret to a config file
+app.use(jwt({ secret: 'aotds', passthrough: true } ));
 app.use(logger());
 app.use(bodyParser());
 
