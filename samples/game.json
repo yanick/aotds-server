@@ -1,0 +1,7 @@
+{
+    "game": { "name": "timed2", "turn_times": { 
+        "deadline": "2018-04-04T15:41:53.939Z",
+        "max": "10s"
+    } },
+    "objects": [ { "id": "enkidu" } ]
+}
