@@ -1,0 +1,14 @@
+/player/{player_id}/token:
+    post:
+        description: provides the player's jwt
+        parameters:
+            - name: player_id
+              in: path
+              type: string
+              required: true
+        x-oai-controller:
+            - file: player
+              handler: auth
+        responses:
+            200:
+                description: success
