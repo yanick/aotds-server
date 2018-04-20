@@ -1,4 +1,5 @@
 const Koa = require('koa');
+const cors = require('@koa/cors');
 import jwt from 'koa-jwt';
 
 const logger = require('koa-logger');
@@ -12,6 +13,8 @@ import knexConfig from '../knexfile';
 import Knex from 'knex';
 
 const app = new Koa();
+
+app.use(cors());
 
 const knex = Knex(knexConfig.development);
 Model.knex(knex);
@@ -44,6 +47,7 @@ const router = new Router({ apiDoc: './api', });
 router.mount(middleware, './src/controllers');
 
 app.use(router.routes());
+app.use(router.allowedMethods());
 
 app.listen(3000, () => console.log( "good to go") );
 
