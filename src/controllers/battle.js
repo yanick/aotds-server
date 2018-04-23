@@ -39,12 +39,13 @@ export const post_orders = async(ctx,next) => {
         throw e;
     }
 
+    debug(orders);
     battle.set_orders( ship_id, orders );
 
     try { await battle.save(); }
     catch(e) { throw e }
 
-    ctx.body = { message: "orders sent" };
+    ctx.body = battle.state.objects.find( o => o.id === ship_id );
 
     await next();
 };
