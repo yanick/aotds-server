@@ -7,19 +7,25 @@ import boom from 'boom';
 
 const debug = require('debug')('aotds:rest');
 
+function _play_turn( battle, force = false ) {
+    let turn = battle.state.game.turn;
+
+    battle.play_turn(force);
+
+    return battle.state.game.turn > turn;
+}
+
 export const play_turn = async(ctx,next) => {
     let { battle_id } = ctx.params;
-    debug( ctx.query );
 
     let battle = await GameTurns.get_battle(battle_id);
 
-    let turn = battle.state.game.turn;
-
-    battle.play_turn(ctx.query.force);
-
-    if( battle.state.game.turn > turn ) {
+    if( _play_turn( battle, ctx.query.force ) ) {
         ctx.status = 201;
         await battle.save(); 
+
+        debug( "here we should tell the world!" );
+        ctx.state.ws_server.new_turn(battle.state.game.name);
     }
 
     ctx.body = battle.state;
@@ -39,13 +45,19 @@ export const post_orders = async(ctx,next) => {
         throw e;
     }
 
-    debug(orders);
+    ctx.state.battle = battle;
+
     battle.set_orders( ship_id, orders );
 
     try { await battle.save(); }
     catch(e) { throw e }
 
     ctx.body = battle.state.objects.find( o => o.id === ship_id );
+
+    if( _play_turn( battle ) ) {
+        await battle.save(); 
+        ctx.state.ws_server.new_turn(battle.state.game.name);
+    }
 
     await next();
 };
