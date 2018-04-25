@@ -12,7 +12,19 @@ import { Model } from 'objection';
 import knexConfig from '../knexfile';
 import Knex from 'knex';
 
+import WSServer from './ws_server';
+
+let ws_server = new WSServer({ 
+    port: 3001,
+});
+
+
 const app = new Koa();
+
+app.use( async(ctx,next) => {
+    ctx.state.ws_server = ws_server;
+    await next();
+});
 
 app.use(cors());
 

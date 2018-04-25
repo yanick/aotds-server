@@ -1,7 +1,13 @@
 {
-    "game": { "name": "epsilon" },
+    "game": { "name": "epsilon",
+        "players": [
+            { "id": "yenzie" },
+            { "id": "yanick" }
+        ]
+    },
     "objects": [
         { "id": "enkidu", 
+            "player_id": "yenzie",
             "name": "Enkidu",
         "drive": { "current": 4, "rating": 4 },
         "navigation": {
@@ -11,6 +17,7 @@
         }} ,
         { "id": "siduri", 
             "name": "Siduri",
+            "player_id": "yanick",
         "drive": { "current": 4, "rating": 4 },
         "navigation": {
             "coords": [110, 120 ],
