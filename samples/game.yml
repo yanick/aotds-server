@@ -1,0 +1,48 @@
+---
+game:
+  name: epsilon
+  players:
+  - id: yenzie
+  - id: yanick
+objects:
+- drive:
+    current: 4
+    rating: 4
+  id: enkidu
+  name: Enkidu
+  navigation:
+    coords:
+    - 100
+    - 100
+    heading: 0
+    velocity: 2
+  player_id: yenzie
+  weaponry:
+    firecons:
+    - id: 1
+    - id: 2
+    - id: 3
+    weapons:
+    - id: 1
+      level: 1
+      type: beam
+      arcs:
+        - AS
+        - AP
+    - id: 2
+      level: 2
+      type: beam
+      arcs:
+        - F
+- drive:
+    current: 4
+    rating: 4
+  id: siduri
+  name: Siduri
+  navigation:
+    coords:
+    - 110
+    - 120
+    heading: 0
+    velocity: 2
+  player_id: yanick

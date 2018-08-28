@@ -11,49 +11,55 @@
       ]
    },
    "objects" : [
-{
-   "drive" : {
-      "current" : 4,
-      "rating" : 4
-   },
-   "id" : "enkidu",
-   "name" : "Enkidu",
-   "navigation" : {
-      "coords" : [
-         100,
-         100
-      ],
-      "heading" : 0,
-      "velocity" : 2
-   },
-   "player_id" : "yenzie",
-   "weaponry" : {
-      "firecons" : [
-         {
-            "id" : 1
+      {
+         "drive" : {
+            "current" : 4,
+            "rating" : 4
          },
-         {
-            "id" : 2
+         "id" : "enkidu",
+         "name" : "Enkidu",
+         "navigation" : {
+            "coords" : [
+               100,
+               100
+            ],
+            "heading" : 0,
+            "velocity" : 2
          },
-         {
-            "id" : 3
+         "player_id" : "yenzie",
+         "weaponry" : {
+            "firecons" : [
+               {
+                  "id" : 1
+               },
+               {
+                  "id" : 2
+               },
+               {
+                  "id" : 3
+               }
+            ],
+            "weapons" : [
+               {
+                  "arcs" : [
+                     "AS",
+                     "AP"
+                  ],
+                  "id" : 1,
+                  "level" : 1,
+                  "type" : "beam"
+               },
+               {
+                  "arcs" : [
+                     "F"
+                  ],
+                  "id" : 2,
+                  "level" : 2,
+                  "type" : "beam"
+               }
+            ]
          }
-      ],
-      "weapons" : [
-         {
-            "id" : 1,
-            "level" : 1,
-            "type" : "beam"
-         },
-         {
-            "id" : 2,
-            "level" : 2,
-            "type" : "beam"
-         }
-      ]
-   }
-}
-      ,
+      },
       {
          "drive" : {
             "current" : 4,
