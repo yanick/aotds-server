@@ -38,10 +38,10 @@ app.use(jwt({ secret: 'aotds', passthrough: true } ));
 app.use(logger());
 app.use(bodyParser());
 
+// error catching
 app.use( async (ctx, next) => {
     try { await next() }
     catch(err) {
-        debug(err);
         if( !err.isBoom ) {
             err = boom.badImplementation(err);
         }
@@ -51,7 +51,12 @@ app.use( async (ctx, next) => {
         if( err.data ) {
             ctx.body.data = err.data;
         }
+        ctx.app.emit('error', err, ctx);
     }
+});
+
+app.on( 'error', (err,ctx) => {
+    debug( "route error: %O", err);
 });
 
 const router = new Router({ apiDoc: './api', });

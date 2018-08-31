@@ -1,62 +1,32 @@
 import fp from 'lodash/fp';
 
-import Knex from 'knex';
-import { Model } from 'objection';
-
 import { create_battle, get_battle } from './battle';
-import GameTurns from '../db/GameTurns';
+import * as battles from '../store/battles';
 
-beforeAll( () => {
-    let knex = Knex({
-        client: 'sqlite3',
-        connection: { filename: ':memory' }
-    });
-    
-    knex.migrate.latest();
-
-    Model.knex(knex);
-});
-
-let sample_game = {
-    "game": { "name": "epsilon" },
-    "objects": [ { "id": "enkidu" } ]
-};
+import Battle from 'aotds-battle';
 
 const debug = require('debug')('aotds:rest:battle');
 
-const create_game = fp.memoize( async () => {
-    let req = { body:  sample_game };
-    let next = jest.fn();
+battles.get_battle = jest.fn();
 
-    await GameTurns.query().delete().where( { name: 'epsilon' } );
+test( 'get unknown battle', async () => {
 
-    let res = {};
-    let res_promise = new Promise( resolve => {
-        res.send = body => resolve(body);
-    });
+    battles.get_battle.mockReturnValueOnce(null);
 
-    let ctx = { request: { body: sample_game } };
+    let ctx = { state: { }, params: { battle_id: 'epsilon' } };
 
-    await create_battle( ctx, () => 1 );
-
-    expect(ctx.body).toMatchObject({
-        game: { name: 'epsilon', turn: 0 }
-    });
+    await expect( get_battle(ctx, () => 1 ) ).rejects.toThrow();
 });
 
-test( 'create a game', create_game )
+test( 'get known battle', async () => {
 
-test( 'get battle', async () => {
-    await create_game();
+    let state = { game: { name: 'epsilon', turn: 0 }};
+    battles.get_battle.mockReturnValueOnce(new Battle({ state} ) );
 
-    let ctx = { params: { battle_id: 'banana' } };
+    let ctx = { state: { }, params: { battle_id: 'epsilon' } };
 
-    await expect( get_battle(ctx, () => 1 ) ).rejects.toThrow(
-    );
+    await get_battle(ctx, () => 1 );
 
-    ctx.params.battle_id = 'epsilon';
-    let good = await get_battle(ctx, () => 1 );
-
-    expect(good).toMatchObject({ game: { name: 'epsilon', turn: 0 }});
+    expect(ctx.body).toMatchObject(state);
 
 });
