@@ -28,17 +28,7 @@
          },
          "player_id" : "yenzie",
          "weaponry" : {
-            "firecons" : [
-               {
-                  "id" : 1
-               },
-               {
-                  "id" : 2
-               },
-               {
-                  "id" : 3
-               }
-            ],
+            "firecons" : 3,
             "weapons" : [
                {
                   "arcs" : [

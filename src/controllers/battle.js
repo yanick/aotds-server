@@ -1,5 +1,6 @@
 import u from 'updeep';
 import _ from 'lodash';
+import fp from 'lodash/fp';
 
 import * as battles from '../store/battles';
 
@@ -37,27 +38,14 @@ export const post_orders = async(ctx,next) => {
     let { battle_id, ship_id } = ctx.params;
     let orders = ctx.request.body;
 
-    let battle;
-    try {
-        battle = await GameTurns.get_battle(battle_id);
-    }
-    catch(e) {
-        throw e;
-    }
+    let battle = await retrieve_battle(ctx,battle_id);
 
-    ctx.state.battle = battle;
+    battle.dispatch_action( 'set_orders', ship_id, orders );
 
-    battle.set_orders( ship_id, orders );
+    ctx.body = battle.state |> fp.get( 'bogeys' )
+            |> fp.find({ id: ship_id });
 
-    try { await battle.save(); }
-    catch(e) { throw e }
-
-    ctx.body = battle.state.objects.find( o => o.id === ship_id );
-
-    if( _play_turn( battle ) ) {
-        await battle.save(); 
-        ctx.state.ws_server.new_turn(battle.state.game.name);
-    }
+    _play_turn( battle );
 
     await next();
 };
